@@ -2,41 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { insertTesterEmail } from "@/lib/supabase";
 
 type Platform = "ios" | "android";
-
-type EmailRequestPayload = {
-  name: string;
-  email: string;
-  platform: Platform;
-};
-
-const sendEmailNotification = async (payload: EmailRequestPayload) => {
-  const response = await fetch("/api/v1/email", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (response.ok) {
-    return;
-  }
-
-  let message = "이메일 발송에 실패했습니다.";
-  try {
-    const data = await response.json();
-    if (data?.message) {
-      message = data.message;
-    }
-  } catch {
-    // ignore JSON parse errors
-  }
-
-  throw new Error(message);
-};
 
 const PLATFORM_COPY: Record<Platform, { label: string; helper: string }> = {
   ios: {
@@ -50,10 +17,6 @@ const PLATFORM_COPY: Record<Platform, { label: string; helper: string }> = {
 };
 
 const PLATFORMS: Platform[] = ["ios", "android"];
-const PLATFORM_TYPE: Record<Platform, 0 | 1> = {
-  ios: 0,
-  android: 1,
-};
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -146,37 +109,33 @@ export default function Home() {
 
     setIsSubmitting(true);
     try {
-      const platformType = PLATFORM_TYPE[selectedPlatform];
-      const result = await insertTesterEmail(
-        trimmedName,
-        normalizedEmail,
-        platformType,
-      );
-      if (!result.ok) {
-        if (result.status === 409) {
-          setServerError("이미 작성한 이메일 입니다.");
-        } else {
-          setServerError(result.message);
-        }
+      const response = await fetch("/api/v1/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: normalizedEmail,
+          platform: selectedPlatform,
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        const message =
+          typeof payload?.message === "string"
+            ? payload.message
+            : "제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        setServerError(message);
         focusEmailInput();
         return;
       }
 
-      let emailWarning: string | null = null;
-      try {
-        await sendEmailNotification({
-          name: trimmedName,
-          email: normalizedEmail,
-          platform: selectedPlatform,
-        });
-      } catch (emailError) {
-        console.error(emailError);
-        emailWarning =
-          emailError instanceof Error
-            ? emailError.message
-            : "이메일 발송 중 문제가 발생했습니다.";
-      }
-
+      const emailWarning =
+        typeof payload?.emailWarning === "string"
+          ? payload.emailWarning
+          : null;
       const baseSuccessMessage = `${PLATFORM_COPY[selectedPlatform].label} 신청이 완료됐습니다.`;
       setSuccessMessage(
         emailWarning
