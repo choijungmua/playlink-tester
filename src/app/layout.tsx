@@ -37,7 +37,9 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className={`${pretendard.className} antialiased min-h-screen w-full`}>
+      <body
+        className={`${pretendard.className} antialiased min-h-[100dvh] w-full overflow-hidden`}
+      >
         <div className="w-full max-w-full px-4 md:px-6 lg:px-8 mx-auto">
           {children}
         </div>
