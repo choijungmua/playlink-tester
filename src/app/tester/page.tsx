@@ -30,8 +30,10 @@ export default function TesterPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAndroidInviteModal, setShowAndroidInviteModal] = useState(false);
   const [inviting, setInviting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState("");
+  const [inviteLink, setInviteLink] = useState("");
   const [exportedTesters, setExportedTesters] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -286,6 +288,71 @@ export default function TesterPage() {
     setShowDeleteModal(false);
   };
 
+  const handleAndroidInviteClick = () => {
+    const selectedTestersList = filteredTesters.filter((t) =>
+      selectedTesters.has(t.id),
+    );
+    if (selectedTestersList.length === 0) {
+      return;
+    }
+    setInviteLink("");
+    setInviteMessage("");
+    setShowAndroidInviteModal(true);
+  };
+
+  const handleAndroidInviteConfirm = async () => {
+    if (!inviteLink.trim()) {
+      setInviteMessage("초대 링크를 입력해주세요.");
+      return;
+    }
+
+    setInviting(true);
+    setInviteMessage("");
+
+    try {
+      const selectedTestersList = filteredTesters.filter((t) =>
+        selectedTesters.has(t.id),
+      );
+
+      const response = await fetch("/api/v1/admin/invite-android", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          testers: selectedTestersList,
+          inviteLink: inviteLink.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setInviteMessage(`성공: ${data.message}`);
+        setSelectedTesters(new Set());
+        // 3초 후 모달 닫기
+        setTimeout(() => {
+          setShowAndroidInviteModal(false);
+          setInviteMessage("");
+          setInviteLink("");
+        }, 3000);
+      } else {
+        setInviteMessage(`오류: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("초대 요청 오류:", error);
+      setInviteMessage("오류: 서버 오류가 발생했습니다.");
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  const handleAndroidInviteCancel = () => {
+    setShowAndroidInviteModal(false);
+    setInviteLink("");
+    setInviteMessage("");
+  };
+
   const filteredTesters = testers
     .filter((t) => t.type === platformFilter)
     .sort((a, b) => {
@@ -355,6 +422,15 @@ export default function TesterPage() {
                 >
                   삭제
                 </button>
+                {platformFilter === 1 && (
+                  <button
+                    onClick={handleAndroidInviteClick}
+                    disabled={selectedTesters.size === 0}
+                    className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    초대
+                  </button>
+                )}
                 <button
                   onClick={handleExportClick}
                   disabled={filteredTesters.length === 0}
@@ -646,6 +722,90 @@ export default function TesterPage() {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />
+
+      {/* Android 초대 모달 */}
+      {showAndroidInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={handleAndroidInviteCancel}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/icon.png"
+                  alt="playlink icon"
+                  width={80}
+                  height={80}
+                />
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Android 테스터 초대
+              </h3>
+              <p className="text-gray-600 mb-4">
+                선택한{" "}
+                <span className="font-semibold text-gray-700">
+                  {selectedTesters.size}명
+                </span>
+                의 테스터에게
+                <br />
+                초대 이메일을 발송합니다.
+              </p>
+
+              <div className="mb-4 text-left">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Google Play Console 초대 링크
+                </label>
+                <input
+                  type="text"
+                  value={inviteLink}
+                  onChange={(e) => setInviteLink(e.target.value)}
+                  placeholder="https://play.google.com/apps/internaltest/..."
+                  disabled={inviting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:bg-gray-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Play Console 내부 테스트 참여 링크를 입력하세요.
+                </p>
+              </div>
+
+              {inviteMessage && (
+                <div
+                  className={`mb-4 p-3 rounded-lg text-sm ${
+                    inviteMessage.startsWith("성공")
+                      ? "bg-gray-100 text-gray-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {inviteMessage}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAndroidInviteCancel}
+                  disabled={inviting}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleAndroidInviteConfirm}
+                  disabled={inviting}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {inviting ? "발송 중..." : "초대 발송"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export const siteConfig = {
     { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
   icons: {
-    icon: "/favicon.png",
+    icon: "/icon.png",
     apple: "/apple-touch-icon.png",
   },
 };

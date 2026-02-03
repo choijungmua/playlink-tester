@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { siteConfig } from "./site";
 
 export const rootMetadata: Metadata = {
@@ -10,7 +10,6 @@ export const rootMetadata: Metadata = {
   keywords: siteConfig.keywords,
   authors: siteConfig.authors,
   creator: siteConfig.creator,
-  themeColor: siteConfig.themeColor,
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -39,4 +38,8 @@ export const rootMetadata: Metadata = {
     },
   },
   manifest: "/site.webmanifest",
+};
+
+export const rootViewport: Viewport = {
+  themeColor: siteConfig.themeColor,
 };

@@ -1,8 +1,8 @@
 import "./globals.css";
 import localFont from "next/font/local";
-import { rootMetadata as metadata } from "@/config/metadata";
+import { rootMetadata as metadata, rootViewport as viewport } from "@/config/metadata";
 
-export { metadata };
+export { metadata, viewport };
 
 const pretendard = localFont({
   src: [
