@@ -133,9 +133,7 @@ export default function Home() {
       }
 
       const emailWarning =
-        typeof payload?.emailWarning === "string"
-          ? payload.emailWarning
-          : null;
+        typeof payload?.emailWarning === "string" ? payload.emailWarning : null;
       const baseSuccessMessage = `${PLATFORM_COPY[selectedPlatform].label} 신청이 완료됐습니다.`;
       setSuccessMessage(
         emailWarning
@@ -160,7 +158,7 @@ export default function Home() {
   const isButtonInactive = isFormIncomplete || isSubmitting;
 
   return (
-    <div className="flex min-h-[100dvh] w-full items-center justify-center px-4 py-6 sm:px-6">
+    <div className="flex min-h-dvh w-full items-center justify-center px-4 py-6 sm:px-6">
       <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8 max-h-[calc(100dvh-3rem)] overflow-y-auto">
         <div className="flex justify-center pb-4">
           <Image src="/icon.png" alt="icon" width={150} height={150} />

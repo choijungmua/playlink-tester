@@ -1,5 +1,8 @@
 import "./globals.css";
 import localFont from "next/font/local";
+import { rootMetadata as metadata } from "@/config/metadata";
+
+export { metadata };
 
 const pretendard = localFont({
   src: [
@@ -33,12 +36,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body
-        className={`${pretendard.className} antialiased min-h-[100dvh] w-full overflow-hidden`}
+        className={`${pretendard.className} antialiased min-h-dvh w-full overflow-hidden`}
       >
         <div className="w-full max-w-full px-4 md:px-6 lg:px-8 mx-auto">
           {children}

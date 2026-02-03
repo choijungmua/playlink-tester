@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { insertTesterEmail } from "@/lib/supabase";
+import { tester } from "@/lib/api";
 import { isMailerConfigured, sendConfirmationEmail } from "@/lib/mailer";
 
 type Platform = "ios" | "android";
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
   const type = PLATFORM_TYPE[platform];
   const platformLabel = PLATFORM_LABEL[platform];
 
-  const insertResult = await insertTesterEmail(name, email, type);
+  const insertResult = await tester.post(name, email, type);
   if (!insertResult.ok) {
     const status = insertResult.status ?? 500;
     return NextResponse.json(

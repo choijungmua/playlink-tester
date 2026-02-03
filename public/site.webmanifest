@@ -1,0 +1,17 @@
+{
+  "name": "플레이링크 테스터",
+  "short_name": "Playlink",
+  "description": "플레이링크 서비스의 베타 테스터 초대 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
